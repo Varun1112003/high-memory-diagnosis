@@ -1,0 +1,22 @@
+---
+- name: High Memory Diagnosis
+  hosts: target
+  gather_facts: yes
+
+  tasks:
+
+    - name: Get memory details
+      command: free -m
+      register: mem
+
+    - name: Show memory details
+      debug:
+        var: mem.stdout_lines
+
+    - name: Get top memory processes
+      shell: ps aux --sort=-%mem | head -10
+      register: proc
+
+    - name: Show processes
+      debug:
+        var: proc.stdout_lines
