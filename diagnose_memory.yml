@@ -1,6 +1,6 @@
 ---
 - name: High Memory Diagnosis
-  hosts: target
+  hosts: localhost
   gather_facts: yes
 
   tasks:
@@ -32,15 +32,26 @@
       debug:
         var: report
 
+    - name: Display received variables
+      debug:
+        msg:
+          - "sys_id={{ sys_id }}"
+          - "incident_number={{ incident_number }}"
+
     - name: Update ServiceNow Work Notes
-      delegate_to: localhost
       uri:
         url: "https://nowlearning-nlinst04650053-246jw-0001.lab.service-now.com/api/now/table/incident/{{ sys_id }}"
         method: PATCH
         user: admin
         password: "{{ snow_password }}"
         force_basic_auth: yes
+        validate_certs: no
         body_format: json
         body:
           work_notes: "{{ report }}"
         status_code: 200
+      register: snow_update
+
+    - name: Display ServiceNow response
+      debug:
+        var: snow_update
