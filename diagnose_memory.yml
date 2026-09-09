@@ -1,6 +1,6 @@
 ---
 - name: High Memory Diagnosis
-  hosts: localhost
+  hosts: target
   gather_facts: yes
 
   tasks:
