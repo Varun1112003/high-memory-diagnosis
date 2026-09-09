@@ -7,16 +7,40 @@
 
     - name: Get memory details
       command: free -m
-      register: mem
-
-    - name: Show memory details
-      debug:
-        var: mem.stdout_lines
+      register: memory_info
 
     - name: Get top memory processes
       shell: ps aux --sort=-%mem | head -10
-      register: proc
+      register: process_info
 
-    - name: Show processes
+    - name: Create diagnosis report
+      set_fact:
+        report: |
+          High Memory Diagnosis Completed
+
+          Incident Number: {{ incident_number }}
+
+          ===== MEMORY DETAILS =====
+
+          {{ memory_info.stdout }}
+
+          ===== TOP MEMORY PROCESSES =====
+
+          {{ process_info.stdout }}
+
+    - name: Display report
       debug:
-        var: proc.stdout_lines
+        var: report
+
+    - name: Update ServiceNow Work Notes
+      delegate_to: localhost
+      uri:
+        url: "https://nowlearning-nlinst04650053-246jw-0001.lab.service-now.com/api/now/table/incident/{{ sys_id }}"
+        method: PATCH
+        user: admin
+        password: "{{ snow_password }}"
+        force_basic_auth: yes
+        body_format: json
+        body:
+          work_notes: "{{ report }}"
+        status_code: 200
