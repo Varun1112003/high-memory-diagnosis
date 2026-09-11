@@ -1,57 +1,8 @@
 ---
-- name: High Memory Diagnosis
+- name: Connection Test
   hosts: target
   gather_facts: yes
 
   tasks:
-
-    - name: Get memory details
-      command: free -m
-      register: memory_info
-
-    - name: Get top memory processes
-      shell: ps aux --sort=-%mem | head -10
-      register: process_info
-
-    - name: Create diagnosis report
-      set_fact:
-        report: |
-          High Memory Diagnosis Completed
-
-          Incident Number: {{ incident_number }}
-
-          ===== MEMORY DETAILS =====
-
-          {{ memory_info.stdout }}
-
-          ===== TOP MEMORY PROCESSES =====
-
-          {{ process_info.stdout }}
-
-    - name: Display report
-      debug:
-        var: report
-
-    - name: Display received variables
-      debug:
-        msg:
-          - "sys_id={{ sys_id }}"
-          - "incident_number={{ incident_number }}"
-
-    - name: Update ServiceNow Work Notes
-      uri:
-        url: "https://nowlearning-nlinst04650053-246jw-0001.lab.service-now.com/api/now/table/incident/{{ sys_id }}"
-        method: PATCH
-        user: admin
-        password: "{{ snow_password }}"
-        force_basic_auth: yes
-        validate_certs: no
-        body_format: json
-        body:
-          work_notes: "{{ report }}"
-        status_code: 200
-      register: snow_update
-
-    - name: Display ServiceNow response
-      debug:
-        var: snow_update
+    - debug:
+        msg: "AAP Connected Successfully"
